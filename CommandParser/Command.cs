@@ -7,17 +7,38 @@ namespace CommandParser;
 public abstract class Command(Type modelType, string name, string? description = null)
 {
     protected Type ModelType { get; } = modelType;
+    protected Func<object, int> Callback { get; set; } =
+        _ => 0;
 
     private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
     private protected Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
+    private protected HashSet<Command> subcommands = [];
 
-    protected Func<object, int> callback = _ => 0;
-
-    internal List<Command> subcommands = [];
-
+    /// <summary>
+    ///     Gets or sets the name of the command, which is used to identify it when parsing input.
+    ///     The name is also used in help text to refer to the command.
+    /// </summary>
     public string Name { get; set; } = name;
+
+    /// <summary>
+    ///     Gets the set of alternative names that can be used to invoke the current command.
+    /// </summary>
     public HashSet<string> Aliases { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    ///     Gets or sets the description of the command.
+    /// </summary>
     public string Description { get; set; } = description ?? string.Empty;
+
+    /// <summary>
+    ///     Adds the specified <paramref name="subcommand"/> to the collection of subcommands for this command.
+    /// </summary>
+    /// <param name="subcommand">The subcommand to add to the collection. This parameter cannot be null.</param>
+    /// <returns>
+    ///     <see langword="true"/> if the subcommand was successfully added; otherwise, <see langword="false"/>.
+    /// </returns>
+    public bool Subcommand(Command subcommand)
+        => subcommands.Add(subcommand);
 }
 
 /// <summary>
@@ -113,7 +134,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     /// </param>
     public void SetCallback(Func<TModel, int> callback)
     {
-        this.callback =
+        this.Callback =
             model => callback((TModel)model);
     }
 
@@ -125,7 +146,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     /// </param>
     public void SetCallback(Action<TModel> callback)
     {
-        this.callback =
+        this.Callback =
             model =>
             {
                 callback((TModel)model);
