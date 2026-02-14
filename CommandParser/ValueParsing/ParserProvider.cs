@@ -4,7 +4,7 @@ namespace CommandParser.ValueParsing;
 
 internal static class ParserProvider
 {
-    public static Dictionary<Type, CliValueParser> Cache = new()
+    private static Dictionary<Type, CliValueParser> Cache = new()
     {
         // the most common defaults are provided to avoid reflection for these
         { typeof(String),         (input, _)        => input },
