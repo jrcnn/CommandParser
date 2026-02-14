@@ -1,10 +1,11 @@
 ﻿using System.Numerics;
+using System.Reflection;
 
 namespace CommandParser.ValueParsing;
 
 internal static class ParserProvider
 {
-    private static Dictionary<Type, CliValueParser> Cache = new()
+    private static readonly Dictionary<Type, CliValueParser> Cache = new()
     {
         // the most common defaults are provided to avoid reflection for these
         { typeof(String),         (input, _)        => input },
@@ -34,4 +35,66 @@ internal static class ParserProvider
         { typeof(Uri),            (input, _)        => new Uri(input) },
         { typeof(Version),        (input, _)        => Version.Parse(input) },
     };
+
+    public static CliValueParser? GetParser<T>()
+        => GetParser(typeof(T));
+
+    public static CliValueParser? GetParser(Type type)
+    {
+        type = Nullable.GetUnderlyingType(type) ?? type;
+        if (Cache.TryGetValue(type, out CliValueParser? parser))
+        {
+            return parser;
+        }
+
+        CliValueParser? newParser = CreateParser(type);
+        if (newParser is null)
+        {
+            return null;
+        }
+
+        Cache[type] = newParser;
+        return newParser;
+    }
+
+    private static CliValueParser? CreateParser(Type type)
+    {
+        MethodInfo? parseMethod = type.GetMethod(
+            "Parse",
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.Static,
+            [typeof(string), typeof(IFormatProvider)]);
+
+        if (parseMethod is not null && parseMethod.IsStatic && parseMethod.ReturnType == type)
+        {
+            return (input, provider) => parseMethod.Invoke(null, [input, provider])!;
+        }
+
+        parseMethod = type.GetMethod(
+            "Parse",
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.Static,
+            [typeof(string)]);
+
+        if (parseMethod is not null && parseMethod.IsStatic && parseMethod.ReturnType == type)
+        {
+            return (input, _) => parseMethod.Invoke(null, [input])!;
+        }
+
+        ConstructorInfo? ctor = type.GetConstructor([typeof(string), typeof(IFormatProvider)]);
+        if (ctor is not null)
+        {
+            return (input, provider) => ctor.Invoke([input, provider]);
+        }
+
+        ctor = type.GetConstructor([typeof(string)]);
+        if (ctor is not null)
+        {
+            return (input, _) => ctor.Invoke([input]);
+        }
+
+        return null;
+    }
 }
