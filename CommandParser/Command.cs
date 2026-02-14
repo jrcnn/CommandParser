@@ -21,11 +21,6 @@ public abstract class Command(Type modelType, string name, string? description =
     public string Name { get; set; } = name;
 
     /// <summary>
-    ///     Gets the set of alternative names that can be used to invoke the current command.
-    /// </summary>
-    public HashSet<string> Aliases { get; } = new(StringComparer.Ordinal);
-
-    /// <summary>
     ///     Gets or sets the description of the command.
     /// </summary>
     public string Description { get; set; } = description ?? string.Empty;
@@ -134,7 +129,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     /// </param>
     public void SetCallback(Func<TModel, int> callback)
     {
-        this.Callback =
+        Callback =
             model => callback((TModel)model);
     }
 
@@ -146,7 +141,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     /// </param>
     public void SetCallback(Action<TModel> callback)
     {
-        this.Callback =
+        Callback =
             model =>
             {
                 callback((TModel)model);
