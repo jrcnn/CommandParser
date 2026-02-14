@@ -2,7 +2,7 @@
 
 namespace CommandParser;
 
-public class RootCommand<TModel>(string? programName = null, string? description = null) :
+public class RootCommand<TModel>(string? description = null, string? programName = null) :
     Command<TModel>(
         programName
             ?? Assembly.GetEntryAssembly()?.GetName().Name
