@@ -68,7 +68,7 @@ internal static class ParserProvider
 
         if (parseMethod is not null && parseMethod.IsStatic && parseMethod.ReturnType == type)
         {
-            return (input, provider) => parseMethod.Invoke(null, [input, provider])!;
+            return CreateParser(parseMethod, hasFormatProvider: true);
         }
 
         parseMethod = type.GetMethod(
@@ -80,21 +80,57 @@ internal static class ParserProvider
 
         if (parseMethod is not null && parseMethod.IsStatic && parseMethod.ReturnType == type)
         {
-            return (input, _) => parseMethod.Invoke(null, [input])!;
+            return CreateParser(parseMethod);
         }
 
         ConstructorInfo? ctor = type.GetConstructor([typeof(string), typeof(IFormatProvider)]);
         if (ctor is not null)
         {
-            return (input, provider) => ctor.Invoke([input, provider]);
+            return CreateParser(ctor, hasFormatProvider: true);
         }
 
         ctor = type.GetConstructor([typeof(string)]);
         if (ctor is not null)
         {
-            return (input, _) => ctor.Invoke([input]);
+            return CreateParser(ctor);
         }
 
         return null;
+    }
+
+    private static CliValueParser CreateParser(MethodInfo method, bool hasFormatProvider = false)
+    {
+        return (input, provider) =>
+        {
+            try
+            {
+                return method.Invoke(null, hasFormatProvider
+                    ? [input, provider]
+                    : [input])!;
+            }
+            catch (TargetInvocationException ex)
+            {
+                // Unwrap the inner exception to provide more meaningful error messages
+                throw ex.InnerException ?? ex;
+            }
+        };
+    }
+
+    private static CliValueParser CreateParser(ConstructorInfo ctor, bool hasFormatProvider = false)
+    {
+        return (input, provider) =>
+        {
+            try
+            {
+                return ctor.Invoke(hasFormatProvider
+                    ? [input, provider]
+                    : [input])!;
+            }
+            catch (TargetInvocationException ex)
+            {
+                // Unwrap the inner exception to provide more meaningful error messages
+                throw ex.InnerException ?? ex;
+            }
+        };
     }
 }
