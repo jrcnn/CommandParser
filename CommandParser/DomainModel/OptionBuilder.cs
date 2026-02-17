@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using CommandParser.Validation;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -104,12 +105,13 @@ public class OptionBuilder<TModel, TProp>
     /// <summary>
     ///     Sets the validation logic for the option being built using the provided <paramref name="predicate"/>.
     /// </summary>
-    /// <param name="predicate">The delegate with the validation logic.</param>
+    /// <param name="validator">The delegate with the validation logic.</param>
     /// <returns>The current <see cref="ArgumentBuilder{TModel, TProp}"/> instance for method chaining.</returns>
-    public OptionBuilder<TModel, TProp> WithValidator(Predicate<TProp> predicate)
+    public OptionBuilder<TModel, TProp> WithValidator(Validator<TProp> validator)
     {
-        Metadata.Validator =
-            input => predicate((TProp)input);
+        Metadata.Validators.Add(
+            (in obj, ctx) => validator((TProp?)obj, ctx));
+
         return this;
     }
 

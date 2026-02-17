@@ -1,4 +1,5 @@
 ﻿using CommandParser.DomainModel;
+using CommandParser.Validation;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -6,10 +7,10 @@ namespace CommandParser;
 
 public abstract class Command(Type modelType, string name, string? description = null)
 {
-    protected Type ModelType { get; } = modelType;
-    protected Func<object, int> Callback { get; set; } =
+    private protected Type ModelType { get; } = modelType;
+    private protected Func<object, int> Callback { get; set; } =
         _ => 0;
-    protected Predicate<object>? Validator { get; set; } = null;
+    private protected List<Validator> Validators { get; set; } = [];
 
     private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
     private protected Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
@@ -151,7 +152,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     }
 
     /// <summary>
-    ///     Sets the validator to be invoked before executing the command to validate the parsed model.
+    ///     Registers a validator to be invoked before executing the command to validate the parsed model.
     /// </summary>
     /// <remarks>
     ///     This method is for high-level validation of the entire model, and the relationships between its properties.
@@ -163,10 +164,10 @@ public class Command<TModel>(string name, string? description = null) : Command(
     ///         to be individually valid when creating the validator you pass to this method.
     ///     </para>
     /// </remarks>
-    /// <param name="predicate">The delegate with the validation logic.</param>
-    public void WithValidator(Predicate<TModel> predicate)
+    /// <param name="validator">The delegate with the validation logic.</param>
+    public void WithValidator(Validator<TModel> validator)
     {
-        Validator =
-            model => predicate((TModel)model);
+        Validators.Add(
+            (in obj, ctx) => validator((TModel?)obj, ctx));
     }
 }

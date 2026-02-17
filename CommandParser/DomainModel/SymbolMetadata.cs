@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using CommandParser.Validation;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace CommandParser.DomainModel;
@@ -9,7 +10,7 @@ internal abstract class SymbolMetadata
     public string Description { get; set; } = string.Empty;
     public Type ValueType { get; }
     public PropertyInfo TargetProperty { get; }
-    public Predicate<object>? Validator { get; set; } = null;
+    public List<Validator> Validators { get; } = [];
 
     internal SymbolMetadata(PropertyInfo targetProperty)
     {
