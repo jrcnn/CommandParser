@@ -9,6 +9,7 @@ internal abstract class SymbolMetadata
     public string Description { get; set; } = string.Empty;
     public Type ValueType { get; }
     public PropertyInfo TargetProperty { get; }
+    public Predicate<object>? Validator { get; set; } = null;
 
     internal SymbolMetadata(PropertyInfo targetProperty)
     {

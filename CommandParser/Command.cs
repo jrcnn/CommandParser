@@ -9,6 +9,7 @@ public abstract class Command(Type modelType, string name, string? description =
     protected Type ModelType { get; } = modelType;
     protected Func<object, int> Callback { get; set; } =
         _ => 0;
+    protected Predicate<object>? Validator { get; set; } = null;
 
     private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
     private protected Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
@@ -147,5 +148,25 @@ public class Command<TModel>(string name, string? description = null) : Command(
                 callback((TModel)model);
                 return 0;
             };
+    }
+
+    /// <summary>
+    ///     Sets the validator to be invoked before executing the command to validate the parsed model.
+    /// </summary>
+    /// <remarks>
+    ///     This method is for high-level validation of the entire model, and the relationships between its properties.
+    ///     It is invoked after all arguments and options have been parsed, validated and bound to the model.
+    ///     <para>
+    ///         If you wish to validate individual properties of the model, consider using
+    ///         <see cref="ArgumentBuilder{TModel, TPop}.WithValidator"/> and <see cref="OptionBuilder{TModel, TProp}.WithValidator"/>
+    ///         when configuring the arguments and options for this command. If you do, you can consider all model properties
+    ///         to be individually valid when creating the validator you pass to this method.
+    ///     </para>
+    /// </remarks>
+    /// <param name="predicate">The delegate with the validation logic.</param>
+    public void WithValidator(Predicate<TModel> predicate)
+    {
+        Validator =
+            model => predicate((TModel)model);
     }
 }

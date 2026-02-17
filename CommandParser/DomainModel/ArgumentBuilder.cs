@@ -40,6 +40,18 @@ public class ArgumentBuilder<TModel, TProp>
         return this;
     }
 
+    /// <summary>
+    ///     Sets the validation logic for the argument being built using the provided <paramref name="predicate"/>.
+    /// </summary>
+    /// <param name="predicate">The delegate with the validation logic.</param>
+    /// <returns>The current <see cref="ArgumentBuilder{TModel, TProp}"/> instance for method chaining.</returns>
+    public ArgumentBuilder<TModel, TProp> WithValidator(Predicate<TProp> predicate)
+    {
+        Metadata.Validator =
+            input => predicate((TProp)input);
+        return this;
+    }
+
     private static PropertyInfo GetProperty(Expression<Func<TModel, TProp>> propertySelector)
     {
         if (propertySelector.Body is not MemberExpression memberExpression)
