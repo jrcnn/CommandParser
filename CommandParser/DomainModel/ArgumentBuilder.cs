@@ -42,7 +42,7 @@ public class ArgumentBuilder<TModel, TProp>
     }
 
     /// <summary>
-    ///     Sets the validation logic for the argument being built using the provided <paramref name="predicate"/>.
+    ///     Registers a <paramref name="validator"/> for the argument being built.
     /// </summary>
     /// <param name="validator">The delegate with the validation logic.</param>
     /// <returns>The current <see cref="ArgumentBuilder{TModel, TProp}"/> instance for method chaining.</returns>
