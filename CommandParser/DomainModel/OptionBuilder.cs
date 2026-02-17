@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using CommandParser.Validation;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -98,6 +99,19 @@ public class OptionBuilder<TModel, TProp>
     {
         Metadata.HasDefaultValue = true;
         Metadata.DefaultValue = defaultValue;
+        return this;
+    }
+
+    /// <summary>
+    ///     Registers a <paramref name="validator"/> for the option being built.
+    /// </summary>
+    /// <param name="validator">The delegate with the validation logic.</param>
+    /// <returns>The current <see cref="ArgumentBuilder{TModel, TProp}"/> instance for method chaining.</returns>
+    public OptionBuilder<TModel, TProp> WithValidator(Validator<TProp> validator)
+    {
+        Metadata.Validators.Add(
+            (in obj, ctx) => validator((TProp?)obj, ctx));
+
         return this;
     }
 

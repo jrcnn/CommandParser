@@ -1,4 +1,5 @@
 ﻿using CommandParser.DomainModel;
+using CommandParser.Validation;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -6,9 +7,10 @@ namespace CommandParser;
 
 public abstract class Command(Type modelType, string name, string? description = null)
 {
-    protected Type ModelType { get; } = modelType;
-    protected Func<object, int> Callback { get; set; } =
+    private protected Type ModelType { get; } = modelType;
+    private protected Func<object, int> Callback { get; set; } =
         _ => 0;
+    private protected List<Validator> Validators { get; set; } = [];
 
     private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
     private protected Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
@@ -147,5 +149,25 @@ public class Command<TModel>(string name, string? description = null) : Command(
                 callback((TModel)model);
                 return 0;
             };
+    }
+
+    /// <summary>
+    ///     Registers a validator to be invoked before executing the command to validate the parsed model.
+    /// </summary>
+    /// <remarks>
+    ///     This method is for high-level validation of the entire model, and the relationships between its properties.
+    ///     It is invoked after all arguments and options have been parsed, validated and bound to the model.
+    ///     <para>
+    ///         If you wish to validate individual properties of the model, consider using
+    ///         <see cref="ArgumentBuilder{TModel, TPop}.WithValidator"/> and <see cref="OptionBuilder{TModel, TProp}.WithValidator"/>
+    ///         when configuring the arguments and options for this command. If you do, you can consider all model properties
+    ///         to be individually valid when creating the validator you pass to this method.
+    ///     </para>
+    /// </remarks>
+    /// <param name="validator">The delegate with the validation logic.</param>
+    public void WithValidator(Validator<TModel> validator)
+    {
+        Validators.Add(
+            (in obj, ctx) => validator((TModel?)obj, ctx));
     }
 }
