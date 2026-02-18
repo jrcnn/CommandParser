@@ -5,7 +5,7 @@ namespace CommandParser.ValueParsing;
 
 internal static class ParserProvider
 {
-    private static readonly Dictionary<Type, CliValueParser> Cache = new()
+    private static readonly Dictionary<Type, ValueParser> Cache = new()
     {
         // the most common defaults are provided to avoid reflection for these
         { typeof(String),         (input, _)        => input },
@@ -36,18 +36,15 @@ internal static class ParserProvider
         { typeof(Version),        (input, _)        => Version.Parse(input) },
     };
 
-    public static CliValueParser? GetParser<T>()
-        => GetParser(typeof(T));
-
-    public static CliValueParser? GetParser(Type type)
+    public static ValueParser? GetParser(Type type)
     {
         type = Nullable.GetUnderlyingType(type) ?? type;
-        if (Cache.TryGetValue(type, out CliValueParser? parser))
+        if (Cache.TryGetValue(type, out ValueParser? parser))
         {
             return parser;
         }
 
-        CliValueParser? newParser = CreateParser(type);
+        ValueParser? newParser = CreateParser(type);
         if (newParser is null)
         {
             return null;
@@ -57,7 +54,7 @@ internal static class ParserProvider
         return newParser;
     }
 
-    private static CliValueParser? CreateParser(Type type)
+    private static ValueParser? CreateParser(Type type)
     {
         MethodInfo? parseMethod = type.GetMethod(
             "Parse",
@@ -98,7 +95,7 @@ internal static class ParserProvider
         return null;
     }
 
-    private static CliValueParser CreateParser(MethodInfo method, bool hasFormatProvider = false)
+    private static ValueParser CreateParser(MethodInfo method, bool hasFormatProvider = false)
     {
         return (input, provider) =>
         {
@@ -116,7 +113,7 @@ internal static class ParserProvider
         };
     }
 
-    private static CliValueParser CreateParser(ConstructorInfo ctor, bool hasFormatProvider = false)
+    private static ValueParser CreateParser(ConstructorInfo ctor, bool hasFormatProvider = false)
     {
         return (input, provider) =>
         {

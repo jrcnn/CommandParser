@@ -1,4 +1,5 @@
 ﻿using CommandParser.Validation;
+using CommandParser.ValueParsing;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -38,6 +39,19 @@ public class ArgumentBuilder<TModel, TProp>
     public ArgumentBuilder<TModel, TProp> WithDescription([DisallowNull] string description)
     {
         Metadata.Description = description;
+        return this;
+    }
+
+    /// <summary>
+    ///     Specifies the <paramref name="parser"/> to use when converting the CLI string
+    ///     input into the appropriate type for the argument's value.
+    /// </summary>
+    /// <param name="parser">The closure for parsing the input into <typeparamref name="TProp"/>.</param>
+    /// <returns>The current <see cref="ArgumentBuilder{TModel, TProp}"/> instance for method chaining.</returns>
+    public ArgumentBuilder<TModel, TProp> WithParser(ValueParser<TProp> parser)
+    {
+        Metadata.Parser =
+            (input, provider) => parser(input, provider);
         return this;
     }
 

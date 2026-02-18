@@ -8,8 +8,8 @@ namespace CommandParser;
 public abstract class Command(Type modelType, string name, string? description = null)
 {
     private protected Type ModelType { get; } = modelType;
-    private protected Func<object, int> Callback { get; set; } =
-        _ => 0;
+    private protected Func<object, CancellationToken, Task<int>> Callback { get; set; } =
+        (_, _) => Task.FromResult(0);
     private protected List<Validator> Validators { get; set; } = [];
 
     private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
@@ -132,7 +132,7 @@ public class Command<TModel>(string name, string? description = null) : Command(
     public void SetCallback(Func<TModel, int> callback)
     {
         Callback =
-            model => callback((TModel)model);
+            (model, _) => Task.FromResult(callback((TModel)model));
     }
 
     /// <summary>
@@ -144,9 +144,67 @@ public class Command<TModel>(string name, string? description = null) : Command(
     public void SetCallback(Action<TModel> callback)
     {
         Callback =
-            model =>
+            (model, _) =>
             {
                 callback((TModel)model);
+                return Task.FromResult(0);
+            };
+    }
+
+    /// <summary>
+    ///     Sets the asynchronous callback function to be invoked when the command is executed.
+    /// </summary>
+    /// <param name="callback">
+    ///     A delegate to execute custom asynchronous logic based on the parsed model.
+    ///     The delegate returns an integer that can be used as an exit code or status code after command execution.
+    /// </param>
+    public void SetCallback(Func<TModel, Task<int>> callback)
+    {
+        Callback =
+            async (model, _) => await callback((TModel)model).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Sets the asynchronous callback function to be invoked when the command is executed.
+    /// </summary>
+    /// <param name="callback">
+    ///     A delegate to execute custom asynchronous logic based on the parsed model.
+    /// </param>
+    public void SetCallback(Func<TModel, Task> callback)
+    {
+        Callback =
+            async (model, _) =>
+            {
+                await callback((TModel)model).ConfigureAwait(false);
+                return 0;
+            };
+    }
+
+    /// <summary>
+    ///     Sets the asynchronous callback function to be invoked when the command is executed.
+    /// </summary>
+    /// <param name="callback">
+    ///     A delegate to execute custom asynchronous logic based on the parsed model.
+    ///     The delegate returns an integer that can be used as an exit code or status code after command execution.
+    /// </param>
+    public void SetCallback(Func<TModel, CancellationToken, Task<int>> callback)
+    {
+        Callback =
+            async (model, ct) => await callback((TModel)model, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Sets the asynchronous callback function to be invoked when the command is executed.
+    /// </summary>
+    /// <param name="callback">
+    ///     A delegate to execute custom asynchronous logic based on the parsed model.
+    /// </param>
+    public void SetCallback(Func<TModel, CancellationToken, Task> callback)
+    {
+        Callback =
+            async (model, ct) =>
+            {
+                await callback((TModel)model, ct).ConfigureAwait(false);
                 return 0;
             };
     }
