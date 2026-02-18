@@ -1,4 +1,5 @@
 ﻿using CommandParser.Validation;
+using CommandParser.ValueParsing;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -91,7 +92,7 @@ public class OptionBuilder<TModel, TProp>
     }
 
     /// <summary>
-    /// Specifies a default value to use for the option if no value is provided by the user.
+    ///     Specifies a default value to use for the option if no value is provided by the user.
     /// </summary>
     /// <param name="defaultValue">The value to use as the default for the option when no explicit value is supplied.</param>
     /// <returns>The current <see cref="OptionBuilder{TModel, TProp}"/> instance for method chaining.</returns>
@@ -99,6 +100,19 @@ public class OptionBuilder<TModel, TProp>
     {
         Metadata.HasDefaultValue = true;
         Metadata.DefaultValue = defaultValue;
+        return this;
+    }
+
+    /// <summary>
+    ///     Specifies the <paramref name="parser"/> to use when converting the CLI string
+    ///     input into the appropriate type for the option's property.
+    /// </summary>
+    /// <param name="parser">The closure for parsing the input into <typeparamref name="TProp"/>.</param>
+    /// <returns>The current <see cref="OptionBuilder{TModel, TProp}"/> instance for method chaining.</returns>
+    public OptionBuilder<TModel, TProp> WithParser(ValueParser<TProp> parser)
+    {
+        Metadata.Parser =
+            (input, provider) => parser(input, provider);
         return this;
     }
 
