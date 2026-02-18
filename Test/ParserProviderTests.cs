@@ -17,11 +17,11 @@ public class ParserProviderTests
     [Test]
     public void GetParser_ReturnsParser()
     {
-        ValueParser? parseParsable           = ParserProvider.GetParser<ParseParsable>();
-        ValueParser? parseParsableStringOnly = ParserProvider.GetParser<ParseParsableStringOnly>();
-        ValueParser? ctorParsable            = ParserProvider.GetParser<ConstructorParsable>();
-        ValueParser? ctorParsableStringOnly  = ParserProvider.GetParser<ConstructorParsableStringOnly>();
-        ValueParser? notParsable             = ParserProvider.GetParser<NotParsable>();
+        ValueParser? parseParsable           = ParserProvider.GetParser(typeof(ParseParsable));
+        ValueParser? parseParsableStringOnly = ParserProvider.GetParser(typeof(ParseParsableStringOnly));
+        ValueParser? ctorParsable            = ParserProvider.GetParser(typeof(ConstructorParsable));
+        ValueParser? ctorParsableStringOnly  = ParserProvider.GetParser(typeof(ConstructorParsableStringOnly));
+        ValueParser? notParsable             = ParserProvider.GetParser(typeof(NotParsable));
 
         Assert.Multiple(() =>
         {
@@ -57,10 +57,10 @@ public class ParserProviderTests
     [Test]
     public void GetParser_CanParseCorrectValue()
     {
-        ValueParser parseParsable           = ParserProvider.GetParser<ParseParsable>()!;
-        ValueParser parseParsableStringOnly = ParserProvider.GetParser<ParseParsableStringOnly>()!;
-        ValueParser ctorParsable            = ParserProvider.GetParser<ConstructorParsable>()!;
-        ValueParser ctorParsableStringOnly  = ParserProvider.GetParser<ConstructorParsableStringOnly>()!;
+        ValueParser parseParsable           = ParserProvider.GetParser(typeof(ParseParsable))!;
+        ValueParser parseParsableStringOnly = ParserProvider.GetParser(typeof(ParseParsableStringOnly))!;
+        ValueParser ctorParsable            = ParserProvider.GetParser(typeof(ConstructorParsable))!;
+        ValueParser ctorParsableStringOnly  = ParserProvider.GetParser(typeof(ConstructorParsableStringOnly))!;
 
         ParseParsable? parseParsableResult                          = parseParsable("10",           CultureInfo.InvariantCulture) as ParseParsable;
         ParseParsableStringOnly? parseParsableStringOnlyResult      = parseParsableStringOnly("10", CultureInfo.InvariantCulture) as ParseParsableStringOnly;
@@ -108,10 +108,10 @@ public class ParserProviderTests
     [Test]
     public void GetParser_CannotParseIncorrectValue()
     {
-        ValueParser parseParsable           = ParserProvider.GetParser<ParseParsable>()!;
-        ValueParser parseParsableStringOnly = ParserProvider.GetParser<ParseParsableStringOnly>()!;
-        ValueParser ctorParsable            = ParserProvider.GetParser<ConstructorParsable>()!;
-        ValueParser ctorParsableStringOnly  = ParserProvider.GetParser<ConstructorParsableStringOnly>()!;
+        ValueParser parseParsable           = ParserProvider.GetParser(typeof(ParseParsable))!;
+        ValueParser parseParsableStringOnly = ParserProvider.GetParser(typeof(ParseParsableStringOnly))!;
+        ValueParser ctorParsable            = ParserProvider.GetParser(typeof(ConstructorParsable))!;
+        ValueParser ctorParsableStringOnly  = ParserProvider.GetParser(typeof(ConstructorParsableStringOnly))!;
 
         Assert.Multiple(() =>
         {

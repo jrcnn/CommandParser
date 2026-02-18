@@ -36,9 +36,6 @@ internal static class ParserProvider
         { typeof(Version),        (input, _)        => Version.Parse(input) },
     };
 
-    public static ValueParser? GetParser<T>()
-        => GetParser(typeof(T));
-
     public static ValueParser? GetParser(Type type)
     {
         type = Nullable.GetUnderlyingType(type) ?? type;
