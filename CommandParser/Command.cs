@@ -7,25 +7,25 @@ namespace CommandParser;
 
 public abstract class Command(Type modelType, string name, string? description = null)
 {
-    private protected Type ModelType { get; } = modelType;
-    private protected Func<object, CancellationToken, Task<int>> Callback { get; set; } =
+    internal Type ModelType { get; } = modelType;
+    internal Func<object, CancellationToken, Task<int>> Callback { get; set; } =
         (_, _) => Task.FromResult(0);
-    private protected List<Validator> Validators { get; set; } = [];
+    internal List<Validator> Validators { get; set; } = [];
 
-    private protected Dictionary<PropertyInfo, OptionMetadata> options = [];
-    private protected Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
-    private protected HashSet<Command> subcommands = [];
+    internal Dictionary<PropertyInfo, OptionMetadata> options = [];
+    internal Dictionary<PropertyInfo, ArgumentMetadata> arguments = [];
+    internal HashSet<Command> subcommands = [];
 
     /// <summary>
-    ///     Gets or sets the name of the command, which is used to identify it when parsing input.
+    ///     Gets the name of the command, which is used to identify it when parsing input.
     ///     The name is also used in help text to refer to the command.
     /// </summary>
-    public string Name { get; set; } = name;
+    public string Name { get; } = name;
 
     /// <summary>
-    ///     Gets or sets the description of the command.
+    ///     Gets the description of the command.
     /// </summary>
-    public string Description { get; set; } = description ?? string.Empty;
+    public string Description { get; } = description ?? string.Empty;
 
     /// <summary>
     ///     Adds the specified <paramref name="subcommand"/> to the collection of subcommands for this command.
@@ -36,6 +36,12 @@ public abstract class Command(Type modelType, string name, string? description =
     /// </returns>
     public bool Subcommand(Command subcommand)
         => subcommands.Add(subcommand);
+
+    public override bool Equals(object? obj)
+        => obj is Command other && Name == other.Name;
+
+    public override int GetHashCode()
+        => Name.GetHashCode();
 }
 
 /// <summary>

@@ -30,7 +30,4 @@ public class ValidationContext
     /// <param name="message">The error message.</param>
     public void AddError(string message)
         => errors.Add(message);
-
-    internal bool HasErrors()
-        => errors.Count > 0;
 }

@@ -4,6 +4,10 @@ using Test.ParserProviderTestData;
 
 namespace Test;
 
+[TestFixture(
+    Description = $"Tests for the parser creation capabilities of the internal type '{nameof(ParserProvider)}'",
+    TestName = "Parser Provider Tests",
+    TestOf = typeof(ParserProvider))]
 public class ParserProviderTests
 {
     /// <summary>
